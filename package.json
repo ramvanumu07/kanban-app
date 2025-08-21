@@ -1,0 +1,42 @@
+{
+  "name": "kanban-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Production-ready Kanban board for security vulnerabilities (React, Redux Toolkit, React DnD, styled-components).",
+  "author": "Your Name",
+  "license": "MIT",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "lint": "eslint src --ext .jsx,.js"
+  },
+  "dependencies": {
+    "@reduxjs/toolkit": "^1.9.5",
+    "react": "^18.2.0",
+    "react-dnd": "^16.0.0",
+    "react-dnd-html5-backend": "^16.0.0",
+    "react-dom": "^18.2.0",
+    "react-redux": "^8.1.1",
+    "react-router-dom": "^6.15.0",
+    "react-scripts": "^5.0.1",
+    "redux": "^4.2.1",
+    "styled-components": "^5.3.11"
+  },
+  "devDependencies": {
+    "eslint": "^8.52.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

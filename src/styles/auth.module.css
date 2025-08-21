@@ -1,0 +1,26 @@
+/* src/styles/auth.module.css */
+
+.authBg {
+  background: linear-gradient(135deg, #f7f9fb 65%, #dcecff 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Card tweaks */
+.authCard {
+  background: #fff;
+  border-radius: 13px;
+  box-shadow: 0 7px 28px #0a185c09;
+  padding: 2.2em 2em 2em 2em;
+  max-width: 380px;
+}
+
+@media (max-width: 480px) {
+  .authCard {
+    max-width: 98vw;
+    padding: 1.2em;
+  }
+}
