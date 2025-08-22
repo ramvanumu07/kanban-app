@@ -122,6 +122,13 @@ const TasksContainer = styled.div`
   }
 `;
 
+const EmptyState = styled.div`
+  text-align: center;
+  padding: 40px 24px;
+  color: #64748b;
+  font-size: 14px;
+`;
+
 function KanbanColumn({
   column,
   tasks = [],
@@ -193,17 +200,23 @@ function KanbanColumn({
       </ColumnHeader>
 
       <TasksContainer>
-        {tasks.map((task) => (
-          <KanbanTaskCard
-            key={task.id}
-            task={task}
-            columnId={column.id}
-            onTaskEdit={onTaskEdit}
-            onTaskDelete={onTaskDelete}
-            onTaskUpdate={onTaskUpdate}
-            availableLabels={availableLabels}
-          />
-        ))}
+        {tasks.length > 0 ? (
+          tasks.map((task) => (
+            <KanbanTaskCard
+              key={task.id}
+              task={task}
+              columnId={column.id}
+              onTaskEdit={onTaskEdit}
+              onTaskDelete={onTaskDelete}
+              onTaskUpdate={onTaskUpdate}
+              availableLabels={availableLabels}
+            />
+          ))
+        ) : (
+          <EmptyState>
+            No tasks in this category yet
+          </EmptyState>
+        )}
       </TasksContainer>
     </ColumnContainer>
   );

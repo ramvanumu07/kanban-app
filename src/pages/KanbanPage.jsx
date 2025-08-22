@@ -15,6 +15,7 @@ import ConfirmDialog from '../components/ui/ConfirmDialog';
 import LabelManager from '../components/kanban/LabelManager';
 import Toast, { useToast } from '../components/ui/Toast';
 import Loader from '../components/common/Loader';
+import ListView from '../components/kanban/ListView';
 import { useAuthentication } from '../hooks/useAuthentication';
 import { useTaskManagement } from '../hooks/useTaskManagement';
 import { useDragAndDrop } from '../hooks/useDragAndDrop';
@@ -291,33 +292,49 @@ function KanbanPage() {
       />
 
       <DndProvider backend={HTML5Backend}>
-        <ColumnsBar
-          className="kanban-columns"
-          style={{
-            display: 'flex',
-            gap: '1.5em',
-            padding: '16px 24px 3em 24px',
-            overflowX: 'auto',
-            minHeight: '70vh'
-          }}
-        >
-          {displayedColumns.map((col) => (
-            <KanbanColumn
-              key={col.id}
-              column={col}
-              tasks={tasks[col.id] || []}
-              onAddTask={handleAddTask}
-              onTaskDrop={handleTaskDragEnd}
-              onTaskEdit={handleTaskEdit}
-              onTaskDelete={handleTaskDelete}
-              onTaskUpdate={updateTask}
-              onColumnEdit={updateColumn}
-              onColumnDelete={handleColumnDelete}
-              availableLabels={labels}
-            />
-          ))}
-          <AddColumnButton onClick={handleAddColumn} />
-        </ColumnsBar>
+        {viewType === 'board' ? (
+          <ColumnsBar
+            className="kanban-columns"
+            style={{
+              display: 'flex',
+              gap: '1.5em',
+              padding: '16px 24px 3em 24px',
+              overflowX: 'auto',
+              minHeight: '70vh'
+            }}
+          >
+            {displayedColumns.map((col) => (
+              <KanbanColumn
+                key={col.id}
+                column={col}
+                tasks={tasks[col.id] || []}
+                onAddTask={handleAddTask}
+                onTaskDrop={handleTaskDragEnd}
+                onTaskEdit={handleTaskEdit}
+                onTaskDelete={handleTaskDelete}
+                onTaskUpdate={updateTask}
+                onColumnEdit={updateColumn}
+                onColumnDelete={handleColumnDelete}
+                availableLabels={labels}
+              />
+            ))}
+            <AddColumnButton onClick={handleAddColumn} />
+          </ColumnsBar>
+        ) : (
+          <ListView
+            columns={displayedColumns}
+            tasks={tasks}
+            onAddTask={handleAddTask}
+            onAddColumn={handleAddColumn}
+            onTaskDrop={handleTaskDragEnd}
+            onTaskEdit={handleTaskEdit}
+            onTaskDelete={handleTaskDelete}
+            onTaskUpdate={updateTask}
+            onColumnEdit={updateColumn}
+            onColumnDelete={handleColumnDelete}
+            availableLabels={labels}
+          />
+        )}
       </DndProvider>
 
       {/* Task Edit Modal */}
