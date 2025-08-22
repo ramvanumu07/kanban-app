@@ -4,7 +4,11 @@ import styled from 'styled-components';
 
 const DropdownContainer = styled.div`
   position: relative;
-  z-index: 1;
+  z-index: 10002;
+  
+  @media (max-width: 768px) {
+    z-index: 10003;
+  }
 `;
 
 const ButtonContainer = styled.button`
@@ -74,12 +78,21 @@ const DropdownMenu = styled.div`
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  z-index: 9999;
+  z-index: 10001;
   opacity: ${props => props.isOpen ? 1 : 0};
   visibility: ${props => props.isOpen ? 'visible' : 'hidden'};
   transform: translateY(${props => props.isOpen ? 0 : -8}px);
   transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
   pointer-events: ${props => props.isOpen ? 'auto' : 'none'};
+  
+  @media (max-width: 768px) {
+    z-index: 10002;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: auto;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  }
 `;
 
 const DropdownItem = styled.div`

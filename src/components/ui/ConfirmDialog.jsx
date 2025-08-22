@@ -12,7 +12,7 @@ const ModalOverlay = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1100;
+  z-index: 999999;
 `;
 
 const DialogContent = styled.div`
@@ -76,45 +76,45 @@ const Button = styled.button`
 `;
 
 function ConfirmDialog({
-    isOpen,
-    onClose,
-    onConfirm,
-    title = "Confirm Action",
-    message = "Are you sure you want to proceed?",
-    confirmText = "Confirm",
-    cancelText = "Cancel",
-    variant = "danger"
+  isOpen,
+  onClose,
+  onConfirm,
+  title = "Confirm Action",
+  message = "Are you sure you want to proceed?",
+  confirmText = "Confirm",
+  cancelText = "Cancel",
+  variant = "danger"
 }) {
-    if (!isOpen) return null;
+  if (!isOpen) return null;
 
-    const handleConfirm = () => {
-        onConfirm();
-        onClose();
-    };
+  const handleConfirm = () => {
+    onConfirm();
+    onClose();
+  };
 
-    return (
-        <ModalOverlay onClick={onClose}>
-            <DialogContent onClick={(e) => e.stopPropagation()}>
-                <DialogHeader>
-                    <DialogTitle>{title}</DialogTitle>
-                    <DialogMessage>{message}</DialogMessage>
-                </DialogHeader>
+  return (
+    <ModalOverlay onClick={onClose}>
+      <DialogContent onClick={(e) => e.stopPropagation()}>
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogMessage>{message}</DialogMessage>
+        </DialogHeader>
 
-                <ButtonGroup>
-                    <Button type="button" onClick={onClose}>
-                        {cancelText}
-                    </Button>
-                    <Button
-                        type="button"
-                        variant={variant}
-                        onClick={handleConfirm}
-                    >
-                        {confirmText}
-                    </Button>
-                </ButtonGroup>
-            </DialogContent>
-        </ModalOverlay>
-    );
+        <ButtonGroup>
+          <Button type="button" onClick={onClose}>
+            {cancelText}
+          </Button>
+          <Button
+            type="button"
+            variant={variant}
+            onClick={handleConfirm}
+          >
+            {confirmText}
+          </Button>
+        </ButtonGroup>
+      </DialogContent>
+    </ModalOverlay>
+  );
 }
 
 export default ConfirmDialog;

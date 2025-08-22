@@ -12,7 +12,7 @@ const ModalOverlay = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 999999;
 `;
 
 const ModalContent = styled.div`
@@ -24,6 +24,13 @@ const ModalContent = styled.div`
   max-height: 80vh;
   overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  
+  @media (max-width: 480px) {
+    width: 95%;
+    padding: 16px;
+    margin: 16px;
+    border-radius: 8px;
+  }
 `;
 
 const ModalHeader = styled.div`
@@ -71,6 +78,12 @@ const FormRow = styled.div`
   display: flex;
   gap: 12px;
   align-items: end;
+  
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
 `;
 
 const FormGroup = styled.div`
@@ -111,6 +124,11 @@ const ColorInput = styled.input`
     outline: none;
     border-color: #3b82f6;
   }
+  
+  @media (max-width: 480px) {
+    width: 100%;
+    height: 44px;
+  }
 `;
 
 const Button = styled.button`
@@ -147,6 +165,12 @@ const Button = styled.button`
       background: #e5e7eb;
     }
   `}
+  
+  @media (max-width: 480px) {
+    padding: 12px 16px;
+    font-size: 16px;
+    min-height: 44px;
+  }
 `;
 
 const LabelsList = styled.div`
@@ -196,150 +220,150 @@ const ErrorMessage = styled.div`
 `;
 
 function LabelManager({
-    isOpen,
-    onClose,
-    labels = [],
-    onAddLabel,
-    onEditLabel,
-    onDeleteLabel
+  isOpen,
+  onClose,
+  labels = [],
+  onAddLabel,
+  onEditLabel,
+  onDeleteLabel
 }) {
-    const [formData, setFormData] = useState({ name: '', color: '#3b82f6' });
-    const [editingId, setEditingId] = useState(null);
-    const [errors, setErrors] = useState({});
+  const [formData, setFormData] = useState({ name: '', color: '#3b82f6' });
+  const [editingId, setEditingId] = useState(null);
+  const [errors, setErrors] = useState({});
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-        const newErrors = {};
-        if (!formData.name.trim()) {
-            newErrors.name = 'Label name is required';
-        } else if (formData.name.length > 30) {
-            newErrors.name = 'Label name must be 30 characters or less';
-        } else {
-            // Check for duplicates
-            const existingNames = labels
-                .filter(label => label.id !== editingId)
-                .map(label => label.name.toLowerCase());
-            if (existingNames.includes(formData.name.trim().toLowerCase())) {
-                newErrors.name = 'A label with this name already exists';
-            }
-        }
+    const newErrors = {};
+    if (!formData.name.trim()) {
+      newErrors.name = 'Label name is required';
+    } else if (formData.name.length > 30) {
+      newErrors.name = 'Label name must be 30 characters or less';
+    } else {
+      // Check for duplicates
+      const existingNames = labels
+        .filter(label => label.id !== editingId)
+        .map(label => label.name.toLowerCase());
+      if (existingNames.includes(formData.name.trim().toLowerCase())) {
+        newErrors.name = 'A label with this name already exists';
+      }
+    }
 
-        setErrors(newErrors);
-        if (Object.keys(newErrors).length > 0) return;
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
 
-        const labelData = {
-            name: formData.name.trim(),
-            color: formData.color
-        };
-
-        if (editingId) {
-            onEditLabel(editingId, labelData);
-            setEditingId(null);
-        } else {
-            const newLabel = {
-                id: `label_${Date.now()}`,
-                ...labelData
-            };
-            onAddLabel(newLabel);
-        }
-
-        setFormData({ name: '', color: '#3b82f6' });
+    const labelData = {
+      name: formData.name.trim(),
+      color: formData.color
     };
 
-    const handleEdit = (label) => {
-        setFormData({ name: label.name, color: label.color });
-        setEditingId(label.id);
-    };
+    if (editingId) {
+      onEditLabel(editingId, labelData);
+      setEditingId(null);
+    } else {
+      const newLabel = {
+        id: `label_${Date.now()}`,
+        ...labelData
+      };
+      onAddLabel(newLabel);
+    }
 
-    const handleCancelEdit = () => {
-        setFormData({ name: '', color: '#3b82f6' });
-        setEditingId(null);
-        setErrors({});
-    };
+    setFormData({ name: '', color: '#3b82f6' });
+  };
 
-    const handleClose = () => {
-        handleCancelEdit();
-        onClose();
-    };
+  const handleEdit = (label) => {
+    setFormData({ name: label.name, color: label.color });
+    setEditingId(label.id);
+  };
 
-    const handleInputChange = (field, value) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
-        if (errors[field]) {
-            setErrors(prev => ({ ...prev, [field]: undefined }));
-        }
-    };
+  const handleCancelEdit = () => {
+    setFormData({ name: '', color: '#3b82f6' });
+    setEditingId(null);
+    setErrors({});
+  };
 
-    if (!isOpen) return null;
+  const handleClose = () => {
+    handleCancelEdit();
+    onClose();
+  };
 
-    return (
-        <ModalOverlay onClick={handleClose}>
-            <ModalContent onClick={(e) => e.stopPropagation()}>
-                <ModalHeader>
-                    <ModalTitle>Manage Labels</ModalTitle>
-                    <CloseButton onClick={handleClose}>×</CloseButton>
-                </ModalHeader>
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: undefined }));
+    }
+  };
 
-                <Form onSubmit={handleSubmit}>
-                    <FormRow>
-                        <FormGroup>
-                            <Label htmlFor="labelName">
-                                {editingId ? 'Edit Label' : 'Add New Label'}
-                            </Label>
-                            <Input
-                                id="labelName"
-                                type="text"
-                                value={formData.name}
-                                onChange={(e) => handleInputChange('name', e.target.value)}
-                                placeholder="Enter label name..."
-                                maxLength={30}
-                            />
-                            {errors.name && <ErrorMessage>{errors.name}</ErrorMessage>}
-                        </FormGroup>
-                        <FormGroup>
-                            <Label htmlFor="labelColor">Color</Label>
-                            <ColorInput
-                                id="labelColor"
-                                type="color"
-                                value={formData.color}
-                                onChange={(e) => handleInputChange('color', e.target.value)}
-                            />
-                        </FormGroup>
-                        <Button type="submit" variant="primary">
-                            {editingId ? 'Update' : 'Add'}
-                        </Button>
-                        {editingId && (
-                            <Button type="button" onClick={handleCancelEdit}>
-                                Cancel
-                            </Button>
-                        )}
-                    </FormRow>
-                </Form>
+  if (!isOpen) return null;
 
-                <LabelsList>
-                    {labels.map(label => (
-                        <LabelItem key={label.id}>
-                            <LabelDisplay>
-                                <LabelColor color={label.color} />
-                                <LabelName>{label.name}</LabelName>
-                            </LabelDisplay>
-                            <LabelActions>
-                                <Button onClick={() => handleEdit(label)}>
-                                    Edit
-                                </Button>
-                                <Button
-                                    variant="danger"
-                                    onClick={() => onDeleteLabel(label.id)}
-                                >
-                                    Delete
-                                </Button>
-                            </LabelActions>
-                        </LabelItem>
-                    ))}
-                </LabelsList>
-            </ModalContent>
-        </ModalOverlay>
-    );
+  return (
+    <ModalOverlay onClick={handleClose}>
+      <ModalContent onClick={(e) => e.stopPropagation()}>
+        <ModalHeader>
+          <ModalTitle>Manage Labels</ModalTitle>
+          <CloseButton onClick={handleClose}>×</CloseButton>
+        </ModalHeader>
+
+        <Form onSubmit={handleSubmit}>
+          <FormRow>
+            <FormGroup>
+              <Label htmlFor="labelName">
+                {editingId ? 'Edit Label' : 'Add New Label'}
+              </Label>
+              <Input
+                id="labelName"
+                type="text"
+                value={formData.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                placeholder="Enter label name..."
+                maxLength={30}
+              />
+              {errors.name && <ErrorMessage>{errors.name}</ErrorMessage>}
+            </FormGroup>
+            <FormGroup>
+              <Label htmlFor="labelColor">Color</Label>
+              <ColorInput
+                id="labelColor"
+                type="color"
+                value={formData.color}
+                onChange={(e) => handleInputChange('color', e.target.value)}
+              />
+            </FormGroup>
+            <Button type="submit" variant="primary">
+              {editingId ? 'Update' : 'Add'}
+            </Button>
+            {editingId && (
+              <Button type="button" onClick={handleCancelEdit}>
+                Cancel
+              </Button>
+            )}
+          </FormRow>
+        </Form>
+
+        <LabelsList>
+          {labels.map(label => (
+            <LabelItem key={label.id}>
+              <LabelDisplay>
+                <LabelColor color={label.color} />
+                <LabelName>{label.name}</LabelName>
+              </LabelDisplay>
+              <LabelActions>
+                <Button onClick={() => handleEdit(label)}>
+                  Edit
+                </Button>
+                <Button
+                  variant="danger"
+                  onClick={() => onDeleteLabel(label.id)}
+                >
+                  Delete
+                </Button>
+              </LabelActions>
+            </LabelItem>
+          ))}
+        </LabelsList>
+      </ModalContent>
+    </ModalOverlay>
+  );
 }
 
 export default LabelManager;

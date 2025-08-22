@@ -6,7 +6,7 @@ const ToastContainer = styled.div`
   position: fixed;
   top: 20px;
   right: 20px;
-  z-index: 9999;
+  z-index: 9999999;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -23,29 +23,29 @@ const ToastItem = styled.div`
   animation: slideIn 0.3s ease-out;
   
   ${props => {
-        switch (props.type) {
-            case 'success':
-                return `
+    switch (props.type) {
+      case 'success':
+        return `
           background: #10b981;
           color: white;
         `;
-            case 'error':
-                return `
+      case 'error':
+        return `
           background: #ef4444;
           color: white;
         `;
-            case 'warning':
-                return `
+      case 'warning':
+        return `
           background: #f59e0b;
           color: white;
         `;
-            default:
-                return `
+      default:
+        return `
           background: #3b82f6;
           color: white;
         `;
-        }
-    }}
+    }
+  }}
   
   @keyframes slideIn {
     from {
@@ -85,65 +85,65 @@ const Icon = styled.div`
 `;
 
 function Toast({ toasts, onRemove }) {
-    if (!toasts || toasts.length === 0) return null;
+  if (!toasts || toasts.length === 0) return null;
 
-    return (
-        <ToastContainer>
-            {toasts.map((toast) => (
-                <ToastItem key={toast.id} type={toast.type}>
-                    <Icon>
-                        {toast.type === 'success' && '✓'}
-                        {toast.type === 'error' && '✗'}
-                        {toast.type === 'warning' && '⚠'}
-                        {toast.type === 'info' && 'ℹ'}
-                    </Icon>
-                    <ToastMessage>{toast.message}</ToastMessage>
-                    <CloseButton onClick={() => onRemove(toast.id)}>
-                        ×
-                    </CloseButton>
-                </ToastItem>
-            ))}
-        </ToastContainer>
-    );
+  return (
+    <ToastContainer>
+      {toasts.map((toast) => (
+        <ToastItem key={toast.id} type={toast.type}>
+          <Icon>
+            {toast.type === 'success' && '✓'}
+            {toast.type === 'error' && '✗'}
+            {toast.type === 'warning' && '⚠'}
+            {toast.type === 'info' && 'ℹ'}
+          </Icon>
+          <ToastMessage>{toast.message}</ToastMessage>
+          <CloseButton onClick={() => onRemove(toast.id)}>
+            ×
+          </CloseButton>
+        </ToastItem>
+      ))}
+    </ToastContainer>
+  );
 }
 
 // Hook for managing toasts
 export function useToast() {
-    const [toasts, setToasts] = useState([]);
+  const [toasts, setToasts] = useState([]);
 
-    const addToast = (message, type = 'info', duration = 5000) => {
-        const id = Date.now() + Math.random();
-        const toast = { id, message, type };
+  const addToast = (message, type = 'info', duration = 5000) => {
+    const id = Date.now() + Math.random();
+    const toast = { id, message, type };
 
-        setToasts(prev => [...prev, toast]);
+    setToasts(prev => [...prev, toast]);
 
-        if (duration > 0) {
-            setTimeout(() => {
-                removeToast(id);
-            }, duration);
-        }
+    if (duration > 0) {
+      setTimeout(() => {
+        removeToast(id);
+      }, duration);
+    }
 
-        return id;
-    };
+    return id;
+  };
 
-    const removeToast = (id) => {
-        setToasts(prev => prev.filter(toast => toast.id !== id));
-    };
+  const removeToast = (id) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  };
 
-    const clearAllToasts = () => {
-        setToasts([]);
-    };
+  const clearAllToasts = () => {
+    setToasts([]);
+  };
 
-    return {
-        toasts,
-        addToast,
-        removeToast,
-        clearAllToasts,
-        showSuccess: (message, duration) => addToast(message, 'success', duration),
-        showError: (message, duration) => addToast(message, 'error', duration),
-        showWarning: (message, duration) => addToast(message, 'warning', duration),
-        showInfo: (message, duration) => addToast(message, 'info', duration)
-    };
+  return {
+    toasts,
+    addToast,
+    removeToast,
+    clearAllToasts,
+    showSuccess: (message, duration) => addToast(message, 'success', duration),
+    showError: (message, duration) => addToast(message, 'error', duration),
+    showWarning: (message, duration) => addToast(message, 'warning', duration),
+    showInfo: (message, duration) => addToast(message, 'info', duration)
+  };
 }
 
 export default Toast;
