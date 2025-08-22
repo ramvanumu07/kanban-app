@@ -380,6 +380,7 @@ function KanbanTaskCard({
   onTaskUpdate,
   onTaskDelete,
   onTaskEdit,
+  onTaskDrop,
   columnId,
   availableLabels = []
 }) {
@@ -472,12 +473,10 @@ function KanbanTaskCard({
     }
   };
 
-  // Handle card click - open edit modal
+  // Handle card click - prevent default behavior, editing only via checkbox menu
   const handleCardClick = (e) => {
     e.stopPropagation();
-    if (onTaskEdit) {
-      onTaskEdit(task.id);
-    }
+    // Card click no longer opens edit modal - use checkbox menu instead
   };
 
   // Handle right click - show context menu
