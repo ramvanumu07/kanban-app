@@ -14,11 +14,18 @@ export const persistenceMiddleware = (store) => (next) => (action) => {
         'kanban/addColumn',
         'kanban/editColumn',
         'kanban/deleteColumn',
+        'kanban/deleteColumnWithTasks',
         'kanban/addTask',
         'kanban/editTask',
         'kanban/deleteTask',
         'kanban/moveTask',
-        'kanban/setKanbanFromLocalStorage'
+        'kanban/moveTasksToColumn',
+        'kanban/setKanbanFromLocalStorage',
+        'kanban/addLabel',
+        'kanban/editLabel',
+        'kanban/deleteLabel',
+        'kanban/addLabelToTask',
+        'kanban/removeLabelFromTask'
     ];
 
     if (kanbanActions.includes(action.type)) {

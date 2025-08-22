@@ -1,6 +1,7 @@
 // src/components/kanban/TaskEditModal.jsx
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import LabelSelector from '../ui/LabelSelector';
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -159,135 +160,162 @@ const Button = styled.button`
   `}
 `;
 
-function TaskEditModal({ isOpen, onClose, task, onSave }) {
-    const [formData, setFormData] = useState({
-        title: '',
-        details: '',
-        priority: 'Medium',
-        assignee: 'Hypejab'
+const ErrorMessage = styled.div`
+  color: #dc2626;
+  font-size: 12px;
+  margin-top: 4px;
+`;
+
+const CharacterCount = styled.div`
+  font-size: 12px;
+  color: #6b7280;
+  text-align: right;
+  margin-top: 4px;
+`;
+
+function TaskEditModal({ isOpen, onClose, task, onSave, availableLabels = [] }) {
+  const [formData, setFormData] = useState({
+    title: '',
+    priority: 'Medium',
+    labels: []
+  });
+  const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    if (task) {
+      setFormData({
+        title: task.title || '',
+        priority: task.priority || 'Medium',
+        labels: task.labels || []
+      });
+    }
+  }, [task]);
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    // Title validation
+    if (!formData.title.trim()) {
+      newErrors.title = 'Task title is required';
+    } else if (formData.title.length > 200) {
+      newErrors.title = 'Title must be 200 characters or less';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    onSave({
+      ...task,
+      title: formData.title.trim(),
+      priority: formData.priority,
+      labels: formData.labels
     });
+  };
 
-    useEffect(() => {
-        if (task) {
-            setFormData({
-                title: task.title || '',
-                details: task.details || '',
-                priority: task.priority || 'Medium',
-                assignee: task.assignee || 'Hypejab'
-            });
-        }
-    }, [task]);
+  const handleClose = () => {
+    // Reset form on close
+    setFormData({
+      title: '',
+      priority: 'Medium',
+      labels: []
+    });
+    setErrors({});
+    onClose();
+  };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+  const handleChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
 
-        if (!formData.title.trim()) {
-            return;
-        }
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({
+        ...prev,
+        [field]: undefined
+      }));
+    }
+  };
 
-        onSave({
-            ...task,
-            title: formData.title.trim(),
-            details: formData.details.trim(),
-            priority: formData.priority,
-            assignee: formData.assignee
-        });
-    };
+  if (!isOpen || !task) return null;
 
-    const handleClose = () => {
-        // Reset form on close
-        setFormData({
-            title: '',
-            details: '',
-            priority: 'Medium',
-            assignee: 'Hypejab'
-        });
-        onClose();
-    };
+  return (
+    <ModalOverlay onClick={handleClose}>
+      <ModalContent onClick={(e) => e.stopPropagation()}>
+        <ModalHeader>
+          <ModalTitle>Edit Task</ModalTitle>
+          <CloseButton onClick={handleClose}>×</CloseButton>
+        </ModalHeader>
 
-    const handleChange = (field, value) => {
-        setFormData(prev => ({
-            ...prev,
-            [field]: value
-        }));
-    };
+        <Form onSubmit={handleSubmit}>
+          <FormGroup>
+            <Label htmlFor="title">Task Title *</Label>
+            <Input
+              id="title"
+              type="text"
+              value={formData.title}
+              onChange={(e) => handleChange('title', e.target.value)}
+              placeholder="Enter task title..."
+              maxLength={200}
+              required
+            />
+            <CharacterCount>{formData.title.length}/200</CharacterCount>
+            {errors.title && <ErrorMessage>{errors.title}</ErrorMessage>}
+          </FormGroup>
 
-    if (!isOpen || !task) return null;
 
-    return (
-        <ModalOverlay onClick={handleClose}>
-            <ModalContent onClick={(e) => e.stopPropagation()}>
-                <ModalHeader>
-                    <ModalTitle>Edit Task</ModalTitle>
-                    <CloseButton onClick={handleClose}>×</CloseButton>
-                </ModalHeader>
 
-                <Form onSubmit={handleSubmit}>
-                    <FormGroup>
-                        <Label htmlFor="title">Task Title *</Label>
-                        <Input
-                            id="title"
-                            type="text"
-                            value={formData.title}
-                            onChange={(e) => handleChange('title', e.target.value)}
-                            placeholder="Enter task title..."
-                            required
-                        />
-                    </FormGroup>
+          <FormGroup>
+            <Label htmlFor="priority">Priority</Label>
+            <Select
+              id="priority"
+              value={formData.priority}
+              onChange={(e) => handleChange('priority', e.target.value)}
+            >
+              <option value="Critical">Critical</option>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </Select>
+          </FormGroup>
 
-                    <FormGroup>
-                        <Label htmlFor="details">Description</Label>
-                        <TextArea
-                            id="details"
-                            value={formData.details}
-                            onChange={(e) => handleChange('details', e.target.value)}
-                            placeholder="Enter task description..."
-                        />
-                    </FormGroup>
 
-                    <FormGroup>
-                        <Label htmlFor="priority">Priority</Label>
-                        <Select
-                            id="priority"
-                            value={formData.priority}
-                            onChange={(e) => handleChange('priority', e.target.value)}
-                        >
-                            <option value="Critical">Critical</option>
-                            <option value="High">High</option>
-                            <option value="Medium">Medium</option>
-                            <option value="Low">Low</option>
-                        </Select>
-                    </FormGroup>
 
-                    <FormGroup>
-                        <Label htmlFor="assignee">Assignee</Label>
-                        <Select
-                            id="assignee"
-                            value={formData.assignee}
-                            onChange={(e) => handleChange('assignee', e.target.value)}
-                        >
-                            <option value="Hypejab">Hypejab</option>
-                            <option value="Gelastra">Gelastra</option>
-                            <option value="SecurityTeam">SecurityTeam</option>
-                        </Select>
-                    </FormGroup>
+          <FormGroup>
+            <Label htmlFor="labels">Labels</Label>
+            <LabelSelector
+              selectedLabels={formData.labels}
+              availableLabels={availableLabels}
+              onLabelsChange={(labels) => handleChange('labels', labels)}
+              placeholder="Select labels for this task..."
+            />
+          </FormGroup>
 
-                    <ButtonGroup>
-                        <Button type="button" onClick={handleClose}>
-                            Cancel
-                        </Button>
-                        <Button
-                            type="submit"
-                            variant="primary"
-                            disabled={!formData.title.trim()}
-                        >
-                            Save Changes
-                        </Button>
-                    </ButtonGroup>
-                </Form>
-            </ModalContent>
-        </ModalOverlay>
-    );
+          <ButtonGroup>
+            <Button type="button" onClick={handleClose}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={!formData.title.trim()}
+            >
+              Save Changes
+            </Button>
+          </ButtonGroup>
+        </Form>
+      </ModalContent>
+    </ModalOverlay>
+  );
 }
 
-export default TaskEditModal;
+export default React.memo(TaskEditModal);

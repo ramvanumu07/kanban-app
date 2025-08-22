@@ -3,28 +3,34 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 
 const AddColumnContainer = styled.div`
+  width: 280px;
   min-width: 280px;
-  max-width: 320px;
-  margin: 0 auto;
+  max-width: 280px;
+  margin: 0;
+  flex-shrink: 0;
   
   @media (max-width: 1366px) {
+    width: 260px;
     min-width: 260px;
-    max-width: 300px;
-  }
-  
-  @media (max-width: 1024px) {
-    min-width: 240px;
-    max-width: 280px;
-  }
-  
-  @media (max-width: 768px) {
-    min-width: 220px;
     max-width: 260px;
   }
   
-  @media (max-width: 480px) {
-    min-width: 200px;
+  @media (max-width: 1024px) {
+    width: 240px;
+    min-width: 240px;
     max-width: 240px;
+  }
+  
+  @media (max-width: 768px) {
+    width: 220px;
+    min-width: 220px;
+    max-width: 220px;
+  }
+  
+  @media (max-width: 480px) {
+    width: 200px;
+    min-width: 200px;
+    max-width: 200px;
   }
 `;
 
@@ -169,9 +175,9 @@ function AddColumnButton({ onClick, disabled }) {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <PlusIcon>+</PlusIcon>
-            <ButtonText>Add Column</ButtonText>
+            <ButtonText>Add Category</ButtonText>
           </div>
-          <Subtitle>Create a new workflow stage</Subtitle>
+          <Subtitle>Create a new task category</Subtitle>
         </div>
       </AddButton>
     </AddColumnContainer>

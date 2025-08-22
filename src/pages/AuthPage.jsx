@@ -46,7 +46,7 @@ const LinkBtn = styled.button`
 `;
 
 function AuthPage() {
-  const { loginUser, signupUser, loading, error, isAuthenticated } = useAuthentication();
+  const { loginUser, signupUser, loading, error, isAuthenticated, clearError, setValidationError } = useAuthentication();
   const [isSignup, setIsSignup] = useState(false);
 
   // Debug: Check if authentication succeeds
@@ -66,11 +66,13 @@ function AuthPage() {
 
   const handleSwitchToLogin = () => {
     console.log('Switching to login');
+    clearError(); // Clear any existing errors
     setIsSignup(false);
   };
 
   const handleSwitchToSignup = () => {
     console.log('Switching to signup');
+    clearError(); // Clear any existing errors
     setIsSignup(true);
   };
 
@@ -85,7 +87,7 @@ function AuthPage() {
     );
   }
 
-    return (
+  return (
     <Wrapper className="auth-page">
       <SwitchBar className="auth-switch">
         {isSignup
@@ -103,15 +105,11 @@ function AuthPage() {
       </SwitchBar>
 
       {isSignup
-        ? <SignupForm onSubmit={handleSignup} loading={loading} error={error} />
-        : <LoginForm onSubmit={handleLogin} loading={loading} error={error} />
+        ? <SignupForm onSubmit={handleSignup} loading={loading} error={error} onValidationError={setValidationError} />
+        : <LoginForm onSubmit={handleLogin} loading={loading} error={error} onValidationError={setValidationError} />
       }
 
-      {error && (
-        <div className="auth-error">
-          Debug Error: {error}
-        </div>
-      )}
+
     </Wrapper>
   );
 }

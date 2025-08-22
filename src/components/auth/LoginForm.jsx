@@ -5,34 +5,31 @@ import Button from '../ui/Button';
 import AuthCard from './AuthCard';
 import { validateUserEmail } from '../../utils/validateUserEmail';
 
-function LoginForm({ onSubmit, loading, error }) {
+function LoginForm({ onSubmit, loading, error, onValidationError }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [emailError, setEmailError] = useState('');
-  const [pwError, setPwError] = useState('');
 
   function handleEmailChange(e) {
     setEmail(e.target.value);
-    setEmailError('');
   }
 
   function handlePasswordChange(e) {
     setPassword(e.target.value);
-    setPwError('');
   }
 
   function handleSubmit(e) {
     e.preventDefault();
-    let valid = true;
+
+    // Client-side validation
     if (!validateUserEmail(email)) {
-      setEmailError('Please enter a valid email address.');
-      valid = false;
+      onValidationError('Please enter a valid email address');
+      return;
     }
     if (password.length < 6) {
-      setPwError('Password must be at least 6 characters.');
-      valid = false;
+      onValidationError('Password must be at least 6 characters');
+      return;
     }
-    if (!valid) return;
+
     onSubmit({ email, password });
   }
 
@@ -48,11 +45,6 @@ function LoginForm({ onSubmit, loading, error }) {
           mb="1.1em"
           className="auth-input"
         />
-        {emailError && (
-          <div style={{ color: '#e21e45', fontSize: '0.85em', marginBottom: '0.65em' }}>
-            {emailError}
-          </div>
-        )}
         <Input
           type="password"
           placeholder="Password"
@@ -62,11 +54,6 @@ function LoginForm({ onSubmit, loading, error }) {
           mb="1.4em"
           className="auth-input"
         />
-        {pwError && (
-          <div style={{ color: '#e21e45', fontSize: '0.85em', marginBottom: '0.65em' }}>
-            {pwError}
-          </div>
-        )}
         <Button
           variant="primary"
           type="submit"

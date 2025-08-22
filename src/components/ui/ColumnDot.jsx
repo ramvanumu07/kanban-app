@@ -9,9 +9,7 @@ const Dot = styled.span`
   border-radius: 50%;
   background-color: ${props => props.color || '#ccc'};
   margin-right: 8px;
-  margin-top: 6px;
   flex-shrink: 0;
-  align-self: flex-start;
 `;
 
 const getColumnColor = (columnTitle) => {

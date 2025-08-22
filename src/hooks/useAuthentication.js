@@ -1,6 +1,6 @@
 // src/hooks/useAuthentication.js
 import { useDispatch, useSelector } from 'react-redux';
-import { login, logout, signup } from '../store/slices/authSlice';
+import { login, logout, signup, logoutUser, clearAuthError, setValidationError } from '../store/slices/authSlice';
 
 /**
  * Manages authentication workflow.
@@ -14,15 +14,23 @@ export function useAuthentication() {
     console.log('Hook: loginUser called with', payload);
     dispatch(login(payload));
   };
-  
+
   const signupUser = (payload) => {
     console.log('Hook: signupUser called with', payload);
     dispatch(signup(payload));
   };
-  
-  const logoutUser = () => {
+
+  const logoutUserAction = () => {
     console.log('Hook: logoutUser called');
-    dispatch(logout());
+    dispatch(logoutUser());
+  };
+
+  const clearError = () => {
+    dispatch(clearAuthError());
+  };
+
+  const setValidationError = (errorMessage) => {
+    dispatch(setValidationError(errorMessage));
   };
 
   return {
@@ -32,6 +40,8 @@ export function useAuthentication() {
     error,
     loginUser,
     signupUser,
-    logoutUser
+    logoutUser: logoutUserAction,
+    clearError,
+    setValidationError
   };
 }

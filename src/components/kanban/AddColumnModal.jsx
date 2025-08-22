@@ -126,66 +126,117 @@ const Button = styled.button`
   `}
 `;
 
-function AddColumnModal({ isOpen, onClose, onSubmit }) {
-    const [title, setTitle] = useState('');
+const ErrorMessage = styled.div`
+  color: #dc2626;
+  font-size: 12px;
+  margin-top: 4px;
+`;
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+const CharacterCount = styled.div`
+  font-size: 12px;
+  color: #6b7280;
+  text-align: right;
+  margin-top: 4px;
+`;
 
-        if (!title.trim()) {
-            return;
-        }
+function AddColumnModal({ isOpen, onClose, onSubmit, existingColumns = [] }) {
+  const [title, setTitle] = useState('');
+  const [errors, setErrors] = useState({});
 
-        onSubmit({ title: title.trim() });
-        setTitle('');
-        onClose();
-    };
+  const validateForm = () => {
+    const newErrors = {};
 
-    const handleClose = () => {
-        setTitle('');
-        onClose();
-    };
+    // Title validation
+    if (!title.trim()) {
+      newErrors.title = 'Column name is required';
+    } else if (title.length > 50) {
+      newErrors.title = 'Column name must be 50 characters or less';
+    } else {
+      // Check for duplicates
+      const existingTitles = existingColumns.map(col => col.title.toLowerCase());
+      if (existingTitles.includes(title.trim().toLowerCase())) {
+        newErrors.title = 'A column with this name already exists';
+      }
+    }
 
-    if (!isOpen) return null;
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-    return (
-        <ModalOverlay onClick={handleClose}>
-            <ModalContent onClick={(e) => e.stopPropagation()}>
-                <ModalHeader>
-                    <ModalTitle>Add New Column</ModalTitle>
-                    <CloseButton onClick={handleClose}>×</CloseButton>
-                </ModalHeader>
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-                <Form onSubmit={handleSubmit}>
-                    <FormGroup>
-                        <Label htmlFor="columnTitle">Column Name *</Label>
-                        <Input
-                            id="columnTitle"
-                            type="text"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            placeholder="Enter column name..."
-                            required
-                            autoFocus
-                        />
-                    </FormGroup>
+    if (!validateForm()) {
+      return;
+    }
 
-                    <ButtonGroup>
-                        <Button type="button" onClick={handleClose}>
-                            Cancel
-                        </Button>
-                        <Button
-                            type="submit"
-                            variant="primary"
-                            disabled={!title.trim()}
-                        >
-                            Create Column
-                        </Button>
-                    </ButtonGroup>
-                </Form>
-            </ModalContent>
-        </ModalOverlay>
-    );
+    onSubmit({ title: title.trim() });
+    setTitle('');
+    setErrors({});
+    onClose();
+  };
+
+  const handleClose = () => {
+    setTitle('');
+    setErrors({});
+    onClose();
+  };
+
+  const handleTitleChange = (e) => {
+    setTitle(e.target.value);
+
+    // Clear error when user starts typing
+    if (errors.title) {
+      setErrors(prev => ({
+        ...prev,
+        title: undefined
+      }));
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <ModalOverlay onClick={handleClose}>
+      <ModalContent onClick={(e) => e.stopPropagation()}>
+        <ModalHeader>
+          <ModalTitle>Add New Column</ModalTitle>
+          <CloseButton onClick={handleClose}>×</CloseButton>
+        </ModalHeader>
+
+        <Form onSubmit={handleSubmit}>
+          <FormGroup>
+            <Label htmlFor="columnTitle">Column Name *</Label>
+            <Input
+              id="columnTitle"
+              type="text"
+              value={title}
+              onChange={handleTitleChange}
+              placeholder="Enter column name..."
+              maxLength={50}
+              required
+              autoFocus
+            />
+            <CharacterCount>{title.length}/50</CharacterCount>
+            {errors.title && <ErrorMessage>{errors.title}</ErrorMessage>}
+          </FormGroup>
+
+          <ButtonGroup>
+            <Button type="button" onClick={handleClose}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={!title.trim()}
+            >
+              Create Column
+            </Button>
+          </ButtonGroup>
+        </Form>
+      </ModalContent>
+    </ModalOverlay>
+  );
 }
 
-export default AddColumnModal;
+export default React.memo(AddColumnModal);

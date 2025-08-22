@@ -1,72 +1,47 @@
-// src/components/kanban/KanbanTaskCard.jsx
-import React, { useState } from 'react';
+// src/components/kanban/KanbanTaskCard.jsx  
+import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { useDrag } from 'react-dnd';
 import StarBadgeComponent from '../ui/StarIcon';
+import LabelTooltip from '../ui/LabelTooltip';
 
 const CardContainer = styled.div`
-  background: #fff;
-  border-radius: 11px;
-  box-shadow: 0 2px 12px rgba(230, 233, 245, 0.8);
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
   margin-bottom: 12px;
-  padding: clamp(12px, 2.5vw, 16px);
-  transition: box-shadow 0.18s, transform 0.1s;
+  padding: clamp(14px, 2.5vw, 18px);
   display: flex;
   flex-direction: column;
-  gap: clamp(4px, 0.8vw, 6px);
+  gap: clamp(2px, 0.4vw, 3px);
   cursor: pointer;
   opacity: ${({ isDragging }) => (isDragging ? 0.6 : 1)};
   position: relative;
   width: 100%;
-  border: 1px solid #f1f3f5;
-  min-height: clamp(100px, 16vh, 120px);
+  min-height: clamp(110px, 16vh, 130px);
   box-sizing: border-box;
-
-  &:hover {
-    box-shadow: 0 4px 20px rgba(230, 233, 245, 0.9);
-    transform: translateY(-1px);
-  }
 
   &:hover .checkbox-container {
     opacity: 1;
   }
 
   &:hover .id-time-group:not(.checked) {
-    transform: translateX(24px);
+    transform: translateX(20px);
   }
 
   &.checked .id-time-group {
-    transform: translateX(24px);
+    transform: translateX(20px);
   }
 
   &.checked .checkbox-container {
     opacity: 1;
   }
 
-  @media (max-width: 1200px) {
-    padding: clamp(10px, 2.2vw, 14px);
-    gap: clamp(3px, 0.7vw, 5px);
-  }
-
-  @media (max-width: 768px) {
-    padding: clamp(8px, 2vw, 12px);
-    gap: clamp(3px, 0.6vw, 4px);
-  }
-
-  @media (max-width: 480px) {
-    padding: clamp(6px, 1.8vw, 10px);
-    gap: clamp(2px, 0.5vw, 3px);
-  }
-
-  @media (max-width: 320px) {
-    padding: clamp(5px, 1.5vw, 8px);
-    gap: clamp(2px, 0.4vw, 3px);
-  }
 `;
 
 const HeaderRow = styled.div`
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   width: 100%;
   margin-bottom: clamp(1px, 0.2vw, 2px);
@@ -75,16 +50,15 @@ const HeaderRow = styled.div`
 
 const CheckboxContainer = styled.div`
   position: absolute;
-  left: -24px;
-  top: 0;
-  opacity: ${({ isChecked }) => isChecked ? 1 : 0};
+  top: 3px;
+  opacity: 0;
   transition: opacity 0.2s ease;
   z-index: 2;
 `;
 
 const Checkbox = styled.div`
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   border: 2px solid #000000;
   border-radius: 3px;
   background: ${props => props.checked ? '#000000' : '#fff'};
@@ -104,7 +78,7 @@ const Checkbox = styled.div`
     &:after {
       content: '✓';
       color: white;
-      font-size: 11px;
+      font-size: 9px;
       font-weight: bold;
       line-height: 1;
     }
@@ -146,34 +120,16 @@ const IconContainer = styled.div`
   flex-shrink: 0;
 `;
 
-const DiamondIcon = styled.div`
-  width: clamp(16px, 2.8vw, 18px);
-  height: clamp(16px, 2.8vw, 18px);
-  background: #1f2937;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+const DiamondIcon = styled.svg`
+  width: clamp(18px, 3vw, 21px);
+  height: clamp(18px, 3vw, 21px);
+  color: #1f2937;
   flex-shrink: 0;
-  position: relative;
-  
-  &:after {
-    content: '';
-    width: clamp(6px, 1.2vw, 8px);
-    height: clamp(6px, 1.2vw, 8px);
-    background: white;
-    border-radius: 1px;
-    transform: rotate(45deg);
-  }
+  margin-right: clamp(2px, 0vw, 2px);
 
   @media (hover: none) and (pointer: coarse) {
-    width: clamp(18px, 3.2vw, 22px);
-    height: clamp(18px, 3.2vw, 22px);
-    
-    &:after {
-      width: clamp(7px, 1.4vw, 9px);
-      height: clamp(7px, 1.4vw, 9px);
-    }
+    width: clamp(22px, 3.6vw, 26px);
+    height: clamp(22px, 3.6vw, 26px);
   }
 `;
 
@@ -200,7 +156,7 @@ const BadgesRow = styled.div`
 const BadgesGroup = styled.div`
   display: flex;
   align-items: center;
-  gap: clamp(4px, 0.8vw, 6px);
+  gap: clamp(6px, 1.2vw, 8px);
   flex-wrap: nowrap;
   flex-shrink: 0;
 `;
@@ -230,25 +186,9 @@ const PriorityBadge = styled.span`
   line-height: 1;
 `;
 
-const AssigneeBadge = styled.span`
-  background: ${props => {
-    switch (props.assignee) {
-      case 'Hypejab': return '#e9d5ff';
-      case 'Gelastra': return '#dcfce7';
-      case 'SecurityTeam': return '#fef3c7';
-      case 'Source Code': return '#dbeafe';
-      default: return '#f3f4f6';
-    }
-  }};
-  color: ${props => {
-    switch (props.assignee) {
-      case 'Hypejab': return '#7c3aed';
-      case 'Gelastra': return '#16a34a';
-      case 'SecurityTeam': return '#d97706';
-      case 'Source Code': return '#3b82f6';
-      default: return '#6b7280';
-    }
-  }};
+const LabelsBadge = styled.span`
+  background: #f3f4f6;
+  color: #6b7280;
   font-size: clamp(12px, 2vw, 13px);
   font-weight: 500;
   padding: clamp(2px, 0.4vw, 3px) clamp(4px, 1vw, 6px);
@@ -259,24 +199,47 @@ const AssigneeBadge = styled.span`
   height: auto;
   flex-shrink: 0;
   line-height: 1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: #e5e7eb;
+    color: #374151;
+  }
+`;
+
+const LabelDot = styled.span`
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: ${props => props.color || '#6b7280'};
+  margin-right: 4px;
+  flex-shrink: 0;
 `;
 
 const RatingContainer = styled.div`
   display: flex;
   align-items: center;
-  gap: clamp(3px, 0.6vw, 4px);
+  gap: clamp(5px, 1vw, 6px);
   flex-shrink: 0;
+  margin-left: clamp(4px, 0.8vw, 6px);
 `;
 
 const CircularRating = styled.div`
   position: relative;
-  width: clamp(8px, 1.4vw, 10px);
-  height: clamp(8px, 1.4vw, 10px);
+  width: clamp(16px, 2.8vw, 18px);
+  height: clamp(16px, 2.8vw, 18px);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transform: translateY(-3px);
+  transform: translateY(-2px);
+  
+  &:hover {
+    transform: translateY(-2px) scale(1.05);
+  }
+  
+  transition: all 0.2s ease;
 `;
 
 const SegmentedCircle = styled.div`
@@ -288,17 +251,17 @@ const SegmentedCircle = styled.div`
 
 const Segment = styled.div`
   position: absolute;
-  width: 1.5px;
-  height: clamp(2.5px, 0.5vw, 3px);
+  width: 2px;
+  height: clamp(4px, 0.8vw, 5px);
   background: ${props => props.filled ? props.color : '#e5e7eb'};
   border-radius: 0.5px;
-  transform-origin: 50% clamp(4px, 0.7vw, 5px);
-  transform: ${props => `rotate(${props.angle}deg) translateY(-2.5px)`};
+  transform-origin: 50% clamp(3px, 0.4vw, 4px);
+  transform: ${props => `rotate(${props.angle}deg) translateY(clamp(-5px, -1vw, -6px))`};
   transition: background 0.3s ease;
   top: 50%;
   left: 50%;
-  margin-left: -0.75px;
-  margin-top: -1.25px;
+  margin-left: -1.25px;
+  margin-top: clamp(-2px, -0.4vw, -2.5px);
 `;
 
 const RatingText = styled.span`
@@ -309,8 +272,8 @@ const RatingText = styled.span`
 `;
 
 const BadgeIcon = styled.div`
-  width: clamp(16px, 2.8vw, 18px);
-  height: clamp(16px, 2.8vw, 18px);
+  width: clamp(20px, 3.2vw, 24px);
+  height: clamp(20px, 3.2vw, 24px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -326,8 +289,8 @@ const BadgeIcon = styled.div`
   }
 
   @media (hover: none) and (pointer: coarse) {
-    width: clamp(20px, 3.2vw, 24px);
-    height: clamp(20px, 3.2vw, 24px);
+    width: clamp(24px, 3.6vw, 28px);
+    height: clamp(24px, 3.6vw, 28px);
   }
 `;
 
@@ -377,9 +340,66 @@ const VerificationTooltip = styled.div`
   }
 `;
 
-function KanbanTaskCard({ task, onTaskUpdate, onTaskDelete, onTaskEdit, columnId }) {
+const ContextMenu = styled.div`
+  position: fixed;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 120px;
+`;
+
+const ContextMenuItem = styled.div`
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  color: ${props => props.danger ? '#dc2626' : '#374151'};
+  
+  &:hover {
+    background: ${props => props.danger ? '#fef2f2' : '#f9fafb'};
+  }
+  
+  &:first-child {
+    border-radius: 8px 8px 0 0;
+  }
+  
+  &:last-child {
+    border-radius: 0 0 8px 8px;
+  }
+  
+  &:only-child {
+    border-radius: 8px;
+  }
+`;
+
+
+
+function KanbanTaskCard({
+  task,
+  onTaskUpdate,
+  onTaskDelete,
+  onTaskEdit,
+  columnId,
+  availableLabels = []
+}) {
   const [isChecked, setIsChecked] = useState(false);
   const [isStarred, setIsStarred] = useState(task.starred || false);
+  const [showContextMenu, setShowContextMenu] = useState(false);
+  const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
+  const [showLabelTooltip, setShowLabelTooltip] = useState(false);
+  const cardRef = useRef(null);
+
+  // Update card classes when checkbox state changes
+  useEffect(() => {
+    if (cardRef.current) {
+      if (isChecked) {
+        cardRef.current.classList.add('checked');
+      } else {
+        cardRef.current.classList.remove('checked');
+      }
+    }
+  }, [isChecked]);
 
   const [{ isDragging }, drag] = useDrag({
     type: 'KANBAN_TASK',
@@ -400,7 +420,7 @@ function KanbanTaskCard({ task, onTaskUpdate, onTaskDelete, onTaskEdit, columnId
     }
   };
 
-  // Generate 12 segments for rating circle
+  // Generate 12 segments for enhanced rating circle
   const generateSegments = () => {
     const segments = [];
     const ratingValue = task.rating || 8.8;
@@ -408,31 +428,36 @@ function KanbanTaskCard({ task, onTaskUpdate, onTaskDelete, onTaskEdit, columnId
     const priorityColor = getPriorityColor(task.priority);
 
     for (let i = 0; i < 12; i++) {
+      const isFilled = i < filledSegments;
+      const delay = i * 0.05; // Staggered animation delay
+
       segments.push(
         <Segment
           key={i}
           angle={i * 30} // 360 / 12 = 30 degrees
-          filled={i < filledSegments}
+          filled={isFilled}
           color={priorityColor}
+          style={{
+            animationDelay: `${delay}s`,
+            opacity: isFilled ? 1 : 0.3
+          }}
         />
       );
     }
     return segments;
   };
 
-  // Handle checkbox toggle
+  // Handle checkbox toggle - show edit/delete options
   const handleCheckboxClick = (e) => {
     e.stopPropagation();
-    const newChecked = !isChecked;
-    setIsChecked(newChecked);
 
-    const cardElement = e.target.closest('.card-container');
-    if (cardElement) {
-      if (newChecked) {
-        cardElement.classList.add('checked');
-      } else {
-        cardElement.classList.remove('checked');
-      }
+    if (!isChecked) {
+      setIsChecked(true);
+      setShowContextMenu(true);
+      setContextMenuPosition({ x: e.clientX, y: e.clientY });
+    } else {
+      setIsChecked(false);
+      setShowContextMenu(false);
     }
   };
 
@@ -444,6 +469,46 @@ function KanbanTaskCard({ task, onTaskUpdate, onTaskDelete, onTaskEdit, columnId
 
     if (onTaskUpdate) {
       onTaskUpdate(task.id, { starred: newStarred });
+    }
+  };
+
+  // Handle card click - open edit modal
+  const handleCardClick = (e) => {
+    e.stopPropagation();
+    if (onTaskEdit) {
+      onTaskEdit(task.id);
+    }
+  };
+
+  // Handle right click - show context menu
+  const handleContextMenu = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenuPosition({ x: e.clientX, y: e.clientY });
+    setShowContextMenu(true);
+  };
+
+  // Close context menu when clicking outside
+  const handleCloseContextMenu = () => {
+    setShowContextMenu(false);
+  };
+
+  // Handle context menu actions
+  const handleEditClick = () => {
+    setShowContextMenu(false);
+    setIsChecked(false); // Reset checkbox after action - useEffect will handle class removal
+
+    if (onTaskEdit) {
+      onTaskEdit(task.id);
+    }
+  };
+
+  const handleDeleteClick = () => {
+    setShowContextMenu(false);
+    setIsChecked(false); // Reset checkbox after action - useEffect will handle class removal
+
+    if (onTaskDelete) {
+      onTaskDelete(task.id);
     }
   };
 
@@ -471,66 +536,149 @@ function KanbanTaskCard({ task, onTaskUpdate, onTaskDelete, onTaskEdit, columnId
 
   const ratingValue = task.rating || 8.8;
 
+  // Get label objects from IDs
+  const getTaskLabels = () => {
+    if (!task.labels || !Array.isArray(task.labels)) return [];
+    return task.labels
+      .map(labelId => availableLabels.find(label => label.id === labelId))
+      .filter(Boolean);
+  };
+
+  // Get label display text for the badge
+  const getLabelDisplayText = () => {
+    const labels = getTaskLabels();
+    if (labels.length === 0) return 'No labels';
+    if (labels.length === 1) return labels[0].name;
+
+    // For multiple labels, show first label and count
+    const firstLabelName = labels[0].name;
+    if (firstLabelName.length > 8) {
+      return `${firstLabelName.substring(0, 6)}...`;
+    }
+    return `${firstLabelName} +${labels.length - 1}`;
+  };
+
+  // Get the color of the first label for the dot
+  const getFirstLabelColor = () => {
+    const labels = getTaskLabels();
+    return labels.length > 0 ? labels[0].color : '#6b7280';
+  };
+
+  // Handle label badge click - show tooltip with all labels
+  const handleLabelClick = (e) => {
+    e.stopPropagation();
+    setShowLabelTooltip(!showLabelTooltip);
+  };
+
+
+
   return (
-    <CardContainer
-      ref={drag}
-      isDragging={isDragging}
-      className={`card-container ${isChecked ? 'checked' : ''}`}
-    >
-      <HeaderRow>
-        <CheckboxContainer className="checkbox-container" isChecked={isChecked}>
-          <Checkbox
-            checked={isChecked}
-            onClick={handleCheckboxClick}
+    <>
+      <CardContainer
+        ref={(node) => {
+          drag(node);
+          cardRef.current = node;
+        }}
+        isDragging={isDragging}
+        className={`card-container`}
+        onClick={handleCardClick}
+        onContextMenu={handleContextMenu}
+      >
+        <HeaderRow>
+          <CheckboxContainer className="checkbox-container" isChecked={isChecked}>
+            <Checkbox
+              checked={isChecked}
+              onClick={handleCheckboxClick}
+            />
+          </CheckboxContainer>
+
+          <IdTimeGroup className={`id-time-group ${isChecked ? 'checked' : ''}`}>
+            <IssueId>#{task.id ? String(task.id).slice(-4).padStart(4, '0') : '8793'}</IssueId>
+            <TimestampContainer>
+              <Timestamp>{formatTimestamp(task.createdAt)}</Timestamp>
+            </TimestampContainer>
+          </IdTimeGroup>
+
+          <IconContainer>
+            <DiamondIcon xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.712 4.33a9.027 9.027 0 0 1 1.652 1.306c.51.51.944 1.064 1.306 1.652M16.712 4.33l-3.448 4.138m3.448-4.138a9.014 9.014 0 0 0-9.424 0M19.67 7.288l-4.138 3.448m4.138-3.448a9.014 9.014 0 0 1 0 9.424m-4.138-5.976a3.736 3.736 0 0 0-.88-1.388 3.737 3.737 0 0 0-1.388-.88m2.268 2.268a3.765 3.765 0 0 1 0 2.528m-2.268-4.796a3.765 3.765 0 0 0-2.528 0m4.796 4.796c-.181.506-.475.982-.88 1.388a3.736 3.736 0 0 1-1.388.88m2.268-2.268 4.138 3.448m0 0a9.027 9.027 0 0 1-1.306 1.652c-.51.51-1.064.944-1.652 1.306m0 0-3.448-4.138m3.448 4.138a9.014 9.014 0 0 1-9.424 0m5.976-4.138a3.765 3.765 0 0 1-2.528 0m0 0a3.736 3.736 0 0 1-1.388-.88 3.737 3.737 0 0 1-.88-1.388m2.268 2.268L7.288 19.67m0 0a9.024 9.024 0 0 1-1.652-1.306 9.027 9.027 0 0 1-1.306-1.652m0 0 4.138-3.448M4.33 16.712a9.014 9.014 0 0 1 0-9.424m4.138 5.976a3.765 3.765 0 0 1 0-2.528m0 0c.181-.506.475-.982.88-1.388a3.736 3.736 0 0 1 1.388-.88m-2.268 2.268L4.33 7.288m6.406 1.18L7.288 4.33m0 0a9.024 9.024 0 0 0-1.652 1.306A9.025 9.025 0 0 0 4.33 7.288" />
+            </DiamondIcon>
+          </IconContainer>
+        </HeaderRow>
+
+        <CardTitle>{task.title}</CardTitle>
+
+        <BadgesRow>
+          <BadgesGroup>
+            <PriorityBadge priority={task.priority}>
+              {task.priority}
+            </PriorityBadge>
+
+            <LabelTooltip
+              labels={getTaskLabels()}
+              isOpen={showLabelTooltip}
+              onToggle={setShowLabelTooltip}
+            >
+              <LabelsBadge>
+                <LabelDot color={getFirstLabelColor()} />
+                {getLabelDisplayText()}
+              </LabelsBadge>
+            </LabelTooltip>
+
+            <RatingContainer>
+              <CircularRating>
+                <SegmentedCircle>
+                  {generateSegments()}
+                </SegmentedCircle>
+              </CircularRating>
+              <RatingText>{ratingValue}</RatingText>
+            </RatingContainer>
+          </BadgesGroup>
+
+          <BadgeIcon>
+            <StarBadgeComponent
+              isActive={isStarred}
+              onClick={handleBadgeClick}
+            />
+            <VerificationTooltip className={isStarred ? 'selected' : ''}>
+              Verified by ramvanumu07@gmail.com
+            </VerificationTooltip>
+          </BadgeIcon>
+        </BadgesRow>
+
+      </CardContainer>
+
+      {/* Context Menu */}
+      {showContextMenu && (
+        <>
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 999
+            }}
+            onClick={handleCloseContextMenu}
           />
-        </CheckboxContainer>
-
-        <IdTimeGroup className={`id-time-group ${isChecked ? 'checked' : ''}`}>
-          <IssueId>#{task.id ? String(task.id).slice(-4).padStart(4, '0') : '8793'}</IssueId>
-          <TimestampContainer>
-            <Timestamp>{formatTimestamp(task.createdAt)}</Timestamp>
-          </TimestampContainer>
-        </IdTimeGroup>
-
-        <IconContainer>
-          <DiamondIcon />
-        </IconContainer>
-      </HeaderRow>
-
-      <CardTitle>{task.title}</CardTitle>
-
-      <BadgesRow>
-        <BadgesGroup>
-          <PriorityBadge priority={task.priority}>
-            {task.priority}
-          </PriorityBadge>
-
-          <AssigneeBadge assignee={task.assignee}>
-            {task.assignee}
-          </AssigneeBadge>
-
-          <RatingContainer>
-            <CircularRating>
-              <SegmentedCircle>
-                {generateSegments()}
-              </SegmentedCircle>
-            </CircularRating>
-            <RatingText>{ratingValue}</RatingText>
-          </RatingContainer>
-        </BadgesGroup>
-
-        <BadgeIcon>
-          <StarBadgeComponent
-            isActive={isStarred}
-            onClick={handleBadgeClick}
-          />
-          <VerificationTooltip className={isStarred ? 'selected' : ''}>
-            Verified by {task.verifiedBy || 'Sam'}
-          </VerificationTooltip>
-        </BadgeIcon>
-      </BadgesRow>
-    </CardContainer>
+          <ContextMenu
+            style={{
+              left: contextMenuPosition.x,
+              top: contextMenuPosition.y
+            }}
+          >
+            <ContextMenuItem onClick={handleEditClick}>
+              Edit Task
+            </ContextMenuItem>
+            <ContextMenuItem danger onClick={handleDeleteClick}>
+              Delete Task
+            </ContextMenuItem>
+          </ContextMenu>
+        </>
+      )}
+    </>
   );
 }
 
-export default KanbanTaskCard;
+export default React.memo(KanbanTaskCard);

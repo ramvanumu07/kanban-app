@@ -17,10 +17,12 @@ const ButtonContainer = styled.button`
   transition: all 0.2s ease;
   min-height: 32px;
   white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 
   &:hover {
     border-color: #9ca3af;
     background: #f9fafb;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 
   &:focus {
@@ -34,25 +36,29 @@ const ButtonContainer = styled.button`
     height: 14px;
     flex-shrink: 0;
   }
+
+  @media (max-width: 768px) {
+    justify-content: center;
+  }
 `;
 
 function FilterButton({
-    icon,
-    label,
-    selected = false,
-    onClick,
-    dashed = false,
-    showLabel = true
+  icon,
+  label,
+  selected = false,
+  onClick,
+  dashed = false,
+  showLabel = true
 }) {
-    return (
-        <ButtonContainer
-            dashed={dashed}
-            onClick={onClick}
-        >
-            {icon}
-            {showLabel && label}
-        </ButtonContainer>
-    );
+  return (
+    <ButtonContainer
+      dashed={dashed}
+      onClick={onClick}
+    >
+      {icon}
+      {showLabel && label}
+    </ButtonContainer>
+  );
 }
 
 export default FilterButton;

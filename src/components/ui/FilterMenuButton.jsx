@@ -1,18 +1,19 @@
-// src/components/ui/DropdownFilterButton.jsx
+// src/components/ui/FilterMenuButton.jsx
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
+import { FilterIcon } from './icons.jsx';
 
-const DropdownContainer = styled.div`
+const MenuContainer = styled.div`
   position: relative;
-  z-index: 1;
+  z-index: 100;
 `;
 
-const ButtonContainer = styled.button`
+const MenuButton = styled.button`
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 8px 12px;
-  border: ${props => props.dashed ? '1px dashed #d1d5db' : '1px solid #d1d5db'};
+  border: 1px solid #d1d5db;
   border-radius: 6px;
   background: white;
   color: #374151;
@@ -22,10 +23,11 @@ const ButtonContainer = styled.button`
   transition: all 0.2s ease;
   min-height: 32px;
   white-space: nowrap;
+  justify-content: center;
+  width: 120px;
+  flex-shrink: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  width: ${props => props.fixedWidth ? props.fixedWidth : 'auto'};
-  flex-shrink: 0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 
   &:hover {
@@ -40,41 +42,37 @@ const ButtonContainer = styled.button`
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
 
-  svg {
-    width: 14px;
-    height: 14px;
-    flex-shrink: 0;
-  }
-
-  &:after {
-    content: ${props => props.hideArrow ? '""' : '"▼"'};
-    font-size: 10px;
-    color: #6b7280;
-    margin-left: 4px;
-  }
-
   @media (max-width: 768px) {
     justify-content: center;
-    width: 100% !important;
+    width: 100%;
     padding: 8px 12px;
     font-size: 13px;
     gap: 6px;
     min-height: 32px;
   }
+
+  svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+
+    @media (max-width: 768px) {
+      width: 14px;
+      height: 14px;
+    }
+  }
 `;
 
-const DropdownMenu = styled.div`
+const FilterMenu = styled.div`
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
-  min-width: 200px;
-  width: max-content;
-  max-width: 300px;
+  right: 0;
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  z-index: 9999;
+  z-index: 10000;
   opacity: ${props => props.isOpen ? 1 : 0};
   visibility: ${props => props.isOpen ? 'visible' : 'hidden'};
   transform: translateY(${props => props.isOpen ? 0 : -8}px);
@@ -82,16 +80,14 @@ const DropdownMenu = styled.div`
   pointer-events: ${props => props.isOpen ? 'auto' : 'none'};
 `;
 
-const DropdownItem = styled.div`
-  padding: 10px 12px;
+const FilterItem = styled.div`
+  padding: 12px 16px;
   cursor: pointer;
   font-size: 13px;
   color: #374151;
   border-bottom: 1px solid #f3f4f6;
-  white-space: nowrap;
   display: flex;
   align-items: center;
-  justify-content: space-between;
 
   &:last-child {
     border-bottom: none;
@@ -112,38 +108,15 @@ const DropdownItem = styled.div`
   &:only-child {
     border-radius: 8px;
   }
-
-  ${props => props.selected && `
-    background: #eff6ff;
-    color: #1e40af;
-    font-weight: 600;
-    
-    &:after {
-      content: '✓';
-      color: #1e40af;
-      font-weight: bold;
-    }
-  `}
 `;
 
-function DropdownFilterButton({
-  icon,
-  label,
-  options = [],
-  value,
-  onChange,
-  dashed = false,
-  showLabel = true,
-  hideArrow = false,
-  fixedWidth = null,
-  buttonText = null // New prop to override the button display text
-}) {
+function FilterMenuButton({ selectedFilter = null, onFilterChange = () => { } }) {
   const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef(null);
+  const menuRef = useRef(null);
 
   useEffect(() => {
     function handleClickOutside(event) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
         setIsOpen(false);
       }
     }
@@ -154,39 +127,40 @@ function DropdownFilterButton({
     };
   }, []);
 
-  const handleSelect = (option) => {
-    onChange(option.value);
-    setIsOpen(false);
-  };
+  const filterOptions = [
+    { label: 'Assigned To', value: 'assignedTo' },
+    { label: 'Severity', value: 'severity' },
+    { label: 'Status', value: 'status' },
+    { label: 'Pentest', value: 'pentest' },
+    { label: 'Target', value: 'target' }
+  ];
 
-  // Use buttonText if provided, otherwise use label
-  const displayText = buttonText || label;
+  const currentFilterLabel = selectedFilter
+    ? filterOptions.find(option => option.value === selectedFilter)?.label || 'Others'
+    : 'Others';
 
   return (
-    <DropdownContainer ref={dropdownRef}>
-      <ButtonContainer
-        dashed={dashed}
-        hideArrow={hideArrow}
-        fixedWidth={fixedWidth}
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        {icon}
-        {showLabel && displayText}
-      </ButtonContainer>
+    <MenuContainer ref={menuRef}>
+      <MenuButton onClick={() => setIsOpen(!isOpen)}>
+        <FilterIcon />
+        {currentFilterLabel}
+      </MenuButton>
 
-      <DropdownMenu isOpen={isOpen}>
-        {options.map((option) => (
-          <DropdownItem
+      <FilterMenu isOpen={isOpen}>
+        {filterOptions.map((option) => (
+          <FilterItem
             key={option.value}
-            selected={option.value === value}
-            onClick={() => handleSelect(option)}
+            onClick={() => {
+              onFilterChange(option.value);
+              setIsOpen(false);
+            }}
           >
             {option.label}
-          </DropdownItem>
+          </FilterItem>
         ))}
-      </DropdownMenu>
-    </DropdownContainer>
+      </FilterMenu>
+    </MenuContainer>
   );
 }
 
-export default DropdownFilterButton;
+export default FilterMenuButton;

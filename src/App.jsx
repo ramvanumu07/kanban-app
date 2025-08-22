@@ -13,7 +13,7 @@ import { setKanbanFromLocalStorage } from './store/slices/kanbanSlice';
 // Test styled component to ensure styles are working
 const AppContainer = styled.div`
   min-height: 100vh;
-  background: #f7f9fb !important;
+  background: #ffffff !important;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
   color: #203970 !important;
 `;
@@ -23,7 +23,7 @@ const LoadingContainer = styled.div`
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background: #f7f9fb;
+  background: #ffffff;
   font-family: 'Inter', sans-serif;
   color: #203970;
   font-size: 16px;

@@ -1,30 +1,31 @@
 // src/components/kanban/KanbanColumn.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useDrop } from 'react-dnd';
 import KanbanTaskCard from './KanbanTaskCard';
-import AddTaskButton from './AddTaskButton';
+import CategoryOptionsMenu from '../ui/CategoryOptionsMenu';
+
 import ColumnDot from '../ui/ColumnDot';
 import { DotsIcon, PlusIcon } from '../ui/icons.jsx';
 
 const ColumnContainer = styled.div`
-  background: #fff;
-  border-radius: 12px;
-  padding: 1.3em 1.1em 1.4em 1.1em;
-  margin: 0 0.5em;
+  background: transparent;
+  padding: 0.8em 1.3em 1.6em 0.8em;
+  margin: 0;
   min-width: 360px;
   max-width: 380px;
-  box-shadow: 0 2px 12px rgba(232, 234, 243, 0.6);
+  width: 360px;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: 1.1em;
-  transition: box-shadow 0.2s, border-color 0.2s;
-  border: 2px solid transparent;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  border-radius: 8px;
 
   &[data-drop-over="true"] {
-    border-color: rgba(20, 100, 255, 0.4);
-    box-shadow: 0 4px 28px rgba(50, 113, 241, 0.1);
-    background: #f8fbff;
+    background: rgba(128, 128, 128, 0.1);
+    border: 2px dashed #000000;
+    padding: calc(0.8em - 2px) calc(1.3em - 2px) calc(1.6em - 2px) calc(0.8em - 2px);
   }
 
   @media (max-width: 768px) {
@@ -45,7 +46,7 @@ const ColumnHeader = styled.div`
 
 const HeaderLeft = styled.div`
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 8px;
 `;
 
@@ -59,14 +60,21 @@ const ActionButton = styled.button`
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 0;
+  padding: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #666;
+  width: 24px;
+  height: 24px;
   
   &:hover {
     color: #333;
+  }
+
+  svg {
+    width: 20px;
+    height: 20px;
   }
 `;
 
@@ -123,8 +131,10 @@ function KanbanColumn({
   onTaskDelete,
   onTaskUpdate,
   onColumnEdit,
-  onColumnDelete
+  onColumnDelete,
+  availableLabels = []
 }) {
+  const [showOptionsMenu, setShowOptionsMenu] = useState(false);
   // DnD drop target for tasks
   const [{ isOver }, dropRef] = useDrop({
     accept: 'KANBAN_TASK',
@@ -137,6 +147,16 @@ function KanbanColumn({
       isOver: monitor.isOver(),
     }),
   });
+
+  const handleDeleteCategory = () => {
+    if (onColumnDelete) {
+      onColumnDelete(column.id);
+    }
+  };
+
+  const handleOptionsMenuClick = () => {
+    setShowOptionsMenu(!showOptionsMenu);
+  };
 
   return (
     <ColumnContainer
@@ -153,28 +173,24 @@ function KanbanColumn({
           </ColumnTitle>
         </HeaderLeft>
         <HeaderRight>
-          <ActionButton
-            title="More options"
-            onClick={() => {
-              // Simple column management without prompts
-              if (tasks.length > 0) {
-                // Cannot delete column with tasks - do nothing
-                return;
-              } else {
-                // Delete empty column without confirmation
-                onColumnDelete?.(column.id);
-              }
-            }}
+          <CategoryOptionsMenu
+            isOpen={showOptionsMenu}
+            onClose={() => setShowOptionsMenu(false)}
+            onDeleteCategory={handleDeleteCategory}
+            taskCount={tasks.length}
           >
-            <DotsIcon />
-          </ActionButton>
+            <ActionButton
+              title="Category options"
+              onClick={handleOptionsMenuClick}
+            >
+              <DotsIcon />
+            </ActionButton>
+          </CategoryOptionsMenu>
           <ActionButton title="Add task" onClick={() => onAddTask?.(column.id)}>
             <PlusIcon />
           </ActionButton>
         </HeaderRight>
       </ColumnHeader>
-
-      <AddTaskButton onClick={() => onAddTask?.(column.id)} />
 
       <TasksContainer>
         {tasks.map((task) => (
@@ -185,6 +201,7 @@ function KanbanColumn({
             onTaskEdit={onTaskEdit}
             onTaskDelete={onTaskDelete}
             onTaskUpdate={onTaskUpdate}
+            availableLabels={availableLabels}
           />
         ))}
       </TasksContainer>

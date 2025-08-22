@@ -20,7 +20,7 @@ const GlobalStyle = createGlobalStyle`
   body {
     margin: 0;
     padding: 0;
-    background: #f7f9fb !important;
+    background: #ffffff !important;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif !important;
     color: #203970 !important;
     min-height: 100vh;
@@ -33,7 +33,7 @@ const GlobalStyle = createGlobalStyle`
 
   #root {
     min-height: 100vh;
-    background: #f7f9fb;
+    background: #ffffff;
   }
 
   /* Typography */
@@ -70,7 +70,7 @@ const GlobalStyle = createGlobalStyle`
 
   /* Utility classes */
   .kanban-board {
-    background: #f7f9fb !important;
+    background: #ffffff !important;
     min-height: 100vh;
     padding: 1.5em 0;
     transition: background 0.19s;

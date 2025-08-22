@@ -1,6 +1,7 @@
-// src/components/kanban/AddTaskModal.jsx
+3// src/components/kanban/AddTaskModal.jsx
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import LabelSelector from '../ui/LabelSelector';
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -155,59 +156,86 @@ const NumberInput = styled(Input)`
   }
 `;
 
-function AddTaskModal({ isOpen, onClose, onSubmit, columnId }) {
-  // Generate random defaults for each new task
-  const generateRandomDefaults = () => {
-    const priorities = ['Critical', 'High', 'Medium', 'Low'];
-    const assignees = ['Hypejab', 'Gelastra', 'SecurityTeam'];
-    const ratings = ['7.2', '8.1', '8.8', '9.1', '6.9', '7.8', '9.3', '8.5'];
+const ErrorMessage = styled.div`
+  color: #dc2626;
+  font-size: 12px;
+  margin-top: 4px;
+`;
 
-    return {
-      title: '',
-      priority: priorities[Math.floor(Math.random() * priorities.length)],
-      assignee: assignees[Math.floor(Math.random() * assignees.length)],
-      rating: ratings[Math.floor(Math.random() * ratings.length)]
-    };
+const CharacterCount = styled.div`
+  font-size: 12px;
+  color: #6b7280;
+  text-align: right;
+  margin-top: 4px;
+`;
+
+function AddTaskModal({ isOpen, onClose, onSubmit, columnId, availableLabels = [] }) {
+  // Default values - no defaults for priority and rating (user must select/enter)
+  const getDefaultValues = () => ({
+    title: '',
+    priority: '',
+    rating: '',
+    labels: [] // Labels are optional
+  });
+
+  const [formData, setFormData] = useState(getDefaultValues());
+  const [errors, setErrors] = useState({});
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    // Title validation
+    if (!formData.title.trim()) {
+      newErrors.title = 'Task title is required';
+    } else if (formData.title.length > 200) {
+      newErrors.title = 'Title must be 200 characters or less';
+    }
+
+    // Priority validation
+    if (!formData.priority) {
+      newErrors.priority = 'Priority level is required';
+    }
+
+    // Rating validation
+    if (!formData.rating || formData.rating.trim() === '') {
+      newErrors.rating = 'Rating is required';
+    } else {
+      const rating = parseFloat(formData.rating);
+      if (isNaN(rating) || rating < 0 || rating > 10) {
+        newErrors.rating = 'Rating must be between 0.0 and 10.0';
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
-
-  const [formData, setFormData] = useState(generateRandomDefaults());
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!formData.title.trim()) {
+    if (!validateForm()) {
       return;
     }
 
     const rating = parseFloat(formData.rating);
-    if (isNaN(rating) || rating < 0 || rating > 10) {
-      return;
-    }
-
     onSubmit(columnId, {
       title: formData.title.trim(),
       priority: formData.priority,
-      assignee: formData.assignee,
       rating: Math.min(Math.max(rating, 0), 10),
       starred: false,
-      labels: ['Security'],
-      assignees: [{ id: '1', name: 'User', initials: 'U', avatar: null }]
+      labels: formData.labels
     });
 
     // Reset form
-    setFormData({
-      title: '',
-      priority: 'Medium',
-      assignee: 'Hypejab',
-      rating: '8.8'
-    });
-
+    setFormData(getDefaultValues());
+    setErrors({});
     onClose();
   };
 
   const handleClose = () => {
-    // Reset form with new random defaults
-    setFormData(generateRandomDefaults());
+    // Reset form to default values
+    setFormData(getDefaultValues());
+    setErrors({});
     onClose();
   };
 
@@ -216,6 +244,23 @@ function AddTaskModal({ isOpen, onClose, onSubmit, columnId }) {
       ...prev,
       [field]: value
     }));
+
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({
+        ...prev,
+        [field]: undefined
+      }));
+    }
+  };
+
+  // Check if all required fields are filled
+  const isFormValid = () => {
+    return (
+      formData.title.trim() !== '' &&
+      formData.priority !== '' &&
+      formData.rating.trim() !== ''
+    );
   };
 
   if (!isOpen) return null;
@@ -237,39 +282,34 @@ function AddTaskModal({ isOpen, onClose, onSubmit, columnId }) {
               value={formData.title}
               onChange={(e) => handleChange('title', e.target.value)}
               placeholder="Enter task title..."
+              maxLength={200}
               required
             />
+            <CharacterCount>{formData.title.length}/200</CharacterCount>
+            {errors.title && <ErrorMessage>{errors.title}</ErrorMessage>}
           </FormGroup>
 
           <FormGroup>
-            <Label htmlFor="priority">Priority</Label>
+            <Label htmlFor="priority">Priority *</Label>
             <Select
               id="priority"
               value={formData.priority}
               onChange={(e) => handleChange('priority', e.target.value)}
+              required
             >
+              <option value="">Select priority level...</option>
               <option value="Critical">Critical</option>
               <option value="High">High</option>
               <option value="Medium">Medium</option>
               <option value="Low">Low</option>
             </Select>
+            {errors.priority && <ErrorMessage>{errors.priority}</ErrorMessage>}
           </FormGroup>
 
-          <FormGroup>
-            <Label htmlFor="assignee">Assignee</Label>
-            <Select
-              id="assignee"
-              value={formData.assignee}
-              onChange={(e) => handleChange('assignee', e.target.value)}
-            >
-              <option value="Hypejab">Hypejab</option>
-              <option value="Gelastra">Gelastra</option>
-              <option value="SecurityTeam">SecurityTeam</option>
-            </Select>
-          </FormGroup>
+
 
           <FormGroup>
-            <Label htmlFor="rating">Rating (0.0 - 10.0)</Label>
+            <Label htmlFor="rating">Rating (0.0 - 10.0) *</Label>
             <NumberInput
               id="rating"
               type="number"
@@ -278,7 +318,19 @@ function AddTaskModal({ isOpen, onClose, onSubmit, columnId }) {
               step="0.1"
               value={formData.rating}
               onChange={(e) => handleChange('rating', e.target.value)}
-              placeholder="8.8"
+              placeholder="Enter rating..."
+              required
+            />
+            {errors.rating && <ErrorMessage>{errors.rating}</ErrorMessage>}
+          </FormGroup>
+
+          <FormGroup>
+            <Label htmlFor="labels">Labels</Label>
+            <LabelSelector
+              selectedLabels={formData.labels}
+              availableLabels={availableLabels}
+              onLabelsChange={(labels) => handleChange('labels', labels)}
+              placeholder="Select labels for this task..."
             />
           </FormGroup>
 
@@ -289,7 +341,7 @@ function AddTaskModal({ isOpen, onClose, onSubmit, columnId }) {
             <Button
               type="submit"
               variant="primary"
-              disabled={!formData.title.trim()}
+              disabled={!isFormValid()}
             >
               Create Task
             </Button>
@@ -300,4 +352,4 @@ function AddTaskModal({ isOpen, onClose, onSubmit, columnId }) {
   );
 }
 
-export default AddTaskModal;
+export default React.memo(AddTaskModal);
